@@ -138,7 +138,7 @@ variable "nombre_instance_backend" {
 ```
 cat inventory.yml
 ```
-Récupérer l'IP frondent, puis y accéder dans votre navigateur internet :
+Récupérer l'IP frontend, puis y accéder dans votre navigateur internet :
 ```
 https://votre_ip_frontend:80 - Accès nginx1
 https://votre_ip_frontend:81 : Accès nginx2
@@ -147,7 +147,7 @@ https://votre_ip_frontend:8000 : Accès ifconfig.io
 https://votre_ip_frontend:8080 : Accès aux statistiques de HaProxy
 ```
 
-# Résultat final
+# Démonstration
 
 ### Port 80 - Nginx
 
