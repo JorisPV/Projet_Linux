@@ -119,7 +119,7 @@ https://votre_ip_frontend:80 - Accès nginx1
 https://votre_ip_frontend:81 : Accès nginx2
 https://votre_ip_frontend:82 : Accès backend Wordpress
 https://votre_ip_frontend:8000 : Accès ifconfig.io
-https://votre_ip_frontend:82 : Accès aux statistiques de HaProxy
+https://votre_ip_frontend:8080 : Accès aux statistiques de HaProxy
 ```
 
 # Firewall
