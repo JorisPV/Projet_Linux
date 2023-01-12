@@ -127,6 +127,7 @@ https://votre_ip_frontend:82 : Accès aux statistiques de HaProxy
 - Le Vrack est en "Open bar" ; tout le reste est bloqué.
 - L'instance FrontEnd possède les ports suivants ouvert :
   - 22 : SSH
+  - 53 : DNS
   - 80 : NGINX (IP public)
   - 81 : NGINX (IP privée)
   - 82 : Wordpress
