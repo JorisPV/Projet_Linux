@@ -6,6 +6,7 @@
 - Déploiement sur deux DataCenters d'OVH (GRA11 & SBG5)
 - Utilisation de Terraform pour générer nos instances
 - Utilisation d'Ansible pour automatiser le déploiement des configurations
+- Utilisation de Docker-compose pour déployer des services
 
 ### Résultat attendu
 
