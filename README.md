@@ -134,6 +134,27 @@ https://votre_ip_frontend:82 : Accès aux statistiques de HaProxy
   - 8080 : Statistiques
 
 # Scalabilité
-``` 
+
 Il est possible d'augmenter le nombre d'instance en modifiant les variables disponible dans le fichier "variables.tf"
-```
+
+# Résultat final
+
+### Port 80 - Nginx
+
+<img src="./80.png" alt="80" title="80">
+
+### Port 81 - Nginx
+
+<img src="./81.png" alt="81" title="81">
+
+### Port 82 - Wordpress
+
+<img src="./82.png" alt="82" title="82">
+
+### Port 8080 - Statistiques HaProxy
+
+<img src="./8080.png" alt="8080" title="8080">
+
+### Port 8000 - Ifconfig.io
+
+<img src="./8000.png" alt="8000" title="8000">
