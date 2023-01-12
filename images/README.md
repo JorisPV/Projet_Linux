@@ -9,7 +9,7 @@
 
 ### Résultat attendu
 
-<img src="./images/Schéma.PNG" alt="Schéma" title="Schéma">
+<img src="./Schéma.PNG" alt="Schéma" title="Schéma">
 
 # Installation
 
@@ -134,27 +134,6 @@ https://votre_ip_frontend:82 : Accès aux statistiques de HaProxy
   - 8080 : Statistiques
 
 # Scalabilité
-
+``` 
 Il est possible d'augmenter le nombre d'instance en modifiant les variables disponible dans le fichier "variables.tf"
-
-# Résultat final
-
-### Port 80 - Nginx
-
-<img src="./images/80.png" alt="80" title="80">
-
-### Port 81 - Nginx
-
-<img src="./images/81.png" alt="81" title="81">
-
-### Port 82 - Wordpress
-
-<img src="./images/82.png" alt="82" title="82">
-
-### Port 8080 - Statistiques HaProxy
-
-<img src="./images/8080.png" alt="8080" title="8080">
-
-### Port 8000 - Ifconfig.io
-
-<img src="./images/8000.png" alt="8000" title="8000">
+```
