@@ -1,88 +1,106 @@
-variable "region_GRA11" { # Variable définissant la région GRA11 pour les instances
+# Variable définissant la région GRA11 pour les instances
+variable "region_GRA11" {
   default = "GRA11"
   type    = string
 }
 
-variable "region_SBG5" { # Variable définissant la région SBG5 pour les instances
+# Variable définissant la région SBG5 pour les instances
+variable "region_SBG5" {
   default = "SBG5"
   type    = string
 }
 
-variable "region_DB" { # Variable définissant la région GRA pour la DB
+# Variable définissant la région GRA pour la DB
+variable "region_DB" {
   default = "GRA"
   type    = string
 }
 
-variable "regions" { # Liste des régions disponible
+# Liste des régions disponible
+variable "regions" {
    default = ["GRA11","SBG5"]
    type    = list
 }
 
-variable "nombre_instance_backend" { # Nombre d'instance Backend
+# Nombre d'instance Backend
+variable "nombre_instance_backend" {
    type = number
    default = 3
 }
 
-variable "instance_name_front" { # Nom de l'instance Frontend
+# Nom de l'instance Frontend
+variable "instance_name_front" {
   type     = string 
   default  = "front_eductive20"
 }
 
-variable "instance_name_gra" { # Nom de l'instance Backend GRA
+# Nom de l'instance Backend GRA
+variable "instance_name_gra" {
   type     = string 
   default  = "backend_eductive20_gra"
 }
 
-variable "instance_name_sbg" { # Nom de l'instance Backend SBG
+# Nom de l'instance Backend SBG
+variable "instance_name_sbg" {
   type    = string
   default = "backend_eductive20_sbg"
 }
 
-variable "name_db" { # Nom utilisateur DB
+# Nom utilisateur DB
+variable "name_db" {
   type    = string
   default = "tp"
 }
 
-variable "service_name" { # Nom du service
+# Nom du service
+variable "service_name" {
   type    = string
 }
 
-variable "image_name"{ # Nom de l'image
+# Nom de l'image
+variable "image_name"{
   type    = string 
   default = "Debian 11"
 }
 
-variable "flavor_name_instance" { # Définition de la taille d'une instance
+# Définition de la taille d'une instance
+variable "flavor_name_instance" {
   type    = string 
   default = "s1-2"
 }
 
-variable "flavor_name_bdd" { # Définition de la taille d'une BDD
+# Définition de la taille d'une BDD
+variable "flavor_name_bdd" {
   type    = string 
   default = "db1-4"
 }
 
-variable "plan_bdd" { # Définition du plan de la DB
+# Définition du plan de la DB
+variable "plan_bdd" {
   type    = string 
   default = "essential"
 }
 
-variable "vlan_id" { # VLAN ID
+# VLAN ID
+variable "vlan_id" {
   type    = number
   default = 20
 }
 
-variable "vlan_dhcp_network" { # Définition du VLAN
+# Définition du VLAN
+variable "vlan_dhcp_network" {
   type = string
   default = "192.168.20.0/24"
 }
 
-variable "vlan_dhcp_start" { # Début du DHCP
+# Début du DHCP
+variable "vlan_dhcp_start" {
   type = string
   default = "192.168.20.100"
 }
 
-variable "vlan_dhcp_end" { # Fin du DHCP
+# Fin du DHCP
+variable "vlan_dhcp_end" {
   type = string
   default = "192.168.20.200"
 }
