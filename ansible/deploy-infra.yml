@@ -1,0 +1,214 @@
+---
+- name: "Récupération des facts des différentes backends"
+  hosts: frontend
+  gather_facts: true
+  tasks:
+    - name: "Récupération du fichier fqdn d'Ansible"
+      ansible.builtin.debug:
+        var: ansible_fqdn
+
+- name: "Installation et configuration de la page web kitten"
+  hosts: backend_*
+
+  vars:
+    user_eductive: "Mon user eductive20 : le meilleur !"
+
+  tasks:
+    - name: "Mise à jour des dépôts de paquets"
+      apt:
+        update_cache: yes
+    - name: "Vérification que nginx est bien installé"
+      apt:
+        name: nginx
+        state: latest
+    - name: "Verification que nginx est bien demarré"
+      service:
+        name: nginx
+        state: started
+    - name: "Configuration de notre page web"
+      template:
+        src: templates/web/index.html
+        dest: /var/www/html/index.html
+
+- name: "Installation et configuration de Docker"
+  hosts: backend_*
+  tasks:
+    - name: "Mise à jour des paquets"
+      apt:
+        update_cache: yes
+    - name: "Installation des dépendances docker"
+      apt:
+        pkg:
+          - apt-transport-https
+          - ca-certificates
+          - lsb-release
+          - gnupg
+        state: latest
+        update_cache: true
+    - name: "Ajout de la key Docker GPG"
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: /etc/apt/trusted.gpg.d/docker.asc
+    - name: "Ajout du repertoire Docker"
+      apt_repository:
+        repo: deb https://download.docker.com/linux/debian bullseye stable
+        state: present
+    - name: "Installation de docker-compose"
+      apt:
+        name:
+          - docker
+          - docker-compose
+          - docker-compose-plugin
+        state: present
+    - name: "Démarrage de Docker..."
+      service:
+        name: docker
+        state: started
+        enabled: yes
+    - name: "Configuration de ifconfig.io"
+      copy:
+        src: templates/ifconfig.io
+        dest: /home/debian/
+    - name: "Deploiement du conteneur ifconfig.io"
+      become: True
+      shell:
+        cmd: "docker-compose up -d "
+        chdir: /home/debian/ifconfig.io/
+
+- name: "Déploiement du serveur NFS"
+  hosts: frontend
+  tasks:
+    - name: "Installation du paquet NFS-Server"
+      apt:
+        name:
+          - nfs-kernel-server
+          - nfs-common
+        state: present
+    - name: "Démarrage du paquet NFS-Server"
+      service:
+        name: nfs-kernel-server
+        state: started
+    - name: "Création du dossier WordPress-DATA"
+      file:
+        path: /home/wordpress-data
+        mode: '0777'
+        state: directory
+    - name: "Configuration avant export du NFS"
+      template:
+        src: ../templates/nfs/nfs.j2
+        dest: /etc/exports
+    - name: "Redémarrage du NFS-Server"
+      service:
+        name: nfs-kernel-server
+        state: restarted
+
+- name: "Montage du NFS Client et deploiement sur les differentes backend"
+  hosts: backend_*
+  vars:
+    front_ip_private: "{% for front in groups.frontend -%} {{ hostvars[front].ansible_ens4.ipv4.address }}:/home/wordpress-data  {% endfor -%}"
+  tasks:
+    - name: "Installation du NFS-Client"
+      apt:
+        name: nfs-common
+        state: present
+    - name: "Création d'un point de montage"
+      file:
+        path: /home/wordpress-data
+        mode: '0777'
+        state: directory
+    - name: "Montage du partage entre les backends"
+      command: mount -t nfs {{front_ip_private}} /home/wordpress-data/
+    - name: "Créer un répertoire pour déployer Wordpress"
+      ansible.builtin.file:
+        path: /wordpress
+        state: directory
+        mode: '0755'
+    - name: "Copie du docker-compose de Wordpress"
+      template:
+        src: ../templates/wordpress/docker-compose.yml
+        dest: /wordpress
+    - name: "Démarrer le docker-compose de Wordpress"
+      docker_compose:
+        project_src: /wordpress
+        state: present            
+
+- name: "Installation et configuration de haproxy"
+  hosts: frontend
+  become: true
+  tasks:
+    - name: "Installation de haproxy"
+      apt:
+        name: haproxy
+        state: present     
+    - name: "Copie de la configuration de haproxy"
+      template:
+        src: templates/haproxy/haproxy.cfg
+        dest: /etc/haproxy/haproxy.cfg
+    - name: "Vérification que haproxy est lancé"
+      service:
+        name: haproxy
+        state: restarted      
+  
+- name: "Partie - Firewall - ALL"
+  hosts: all
+  tasks:
+    - name: "Installation d'IP-Table sur les instances"
+      apt:
+        name: iptables-persistent
+        state: latest
+    - name: "Autorisation du port SSH 22 - Entrant"
+      command: iptables -I INPUT -p tcp --dport 22 -j ACCEPT
+    - name: "Autorisation du port SSH 22 - Sortant"
+      command: iptables -I OUTPUT -p tcp --dport 22 -j ACCEPT
+    - name: "Autorisation des relations établis - Entrant"
+      command: iptables -I INPUT -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT
+    - name: "Autorisation des relations établis - Sortant"
+      command: iptables -I OUTPUT -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT
+    - name: "Autorisation des entrées provenant de notre subnet"
+      command: iptables -A INPUT -s 192.168.20.0/24 -j ACCEPT
+    - name: "Autorisation des sorties provenant de notre subnet"
+      command: iptables -A OUTPUT -d 192.168.20.0/24 -j ACCEPT
+    - name: "Autorisation des entrées provenant de notre interface"
+      command: iptables -A INPUT -i ens4 -j ACCEPT
+    - name: "Autorisation ICMP (ping) - Entrant"
+      command: iptables -A INPUT -p icmp -j ACCEPT
+    - name: "Autorisation ICMP (ping) - Sortant"
+      command: iptables -A OUTPUT  -p icmp -j ACCEPT
+
+- name: "FireWall - Frontend"
+  hosts: frontend
+  tasks:
+    - name: "Port 53 - DNS"
+      command: iptables -A INPUT -p tcp --dport 53 -j ACCEPT
+    - name: "Port 80 - nginx"
+      command: iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+    - name: "Port 81 - nginx"
+      command: iptables -A INPUT -p tcp --dport 81 -j ACCEPT
+    - name: "Port 8000 - Ifconfig.io"
+      command: iptables -A INPUT -p tcp --dport 8000 -j ACCEPT
+    - name: "Port 82 - wordpress"
+      command: iptables -A INPUT -p tcp --dport 82 -j ACCEPT
+    - name: "Port 8080 - Statistique"
+      command: iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
+    - name: "Autorisation des données sortantes"
+      command: iptables -A OUTPUT -j ACCEPT
+    - name: "Tout le reste -> On l'interdit"
+      command: iptables -A INPUT -j DROP
+
+- name: "FireWall - Backend"
+  hosts: backend_*
+  vars:
+    ip_frontend: "{% for front in groups.frontend -%}{{hostvars[front].ansible_facts.default_ipv4.address}}{% endfor -%}"
+  tasks:
+    - name: "Autorisation des entrées provenant de notre interface"
+      command: iptables -A INPUT -i ens4 -j ACCEPT
+    - name: "Autorisation des entrées provenant de notre FrontEnd"
+      command: iptables -A INPUT -p tcp -s {{ip_frontend}} -j ACCEPT
+    - name: "On accepte les entrées provenant de notre interface"
+      command: iptables -A INPUT -i ens4 -j ACCEPT
+    - name: "Tout le reste -> on l'interdit"
+      command: iptables -A INPUT -j DROP
+    - name: "On accepte les sorties provenant de notre subnet"
+      command: iptables -A OUTPUT -d 192.168.20.0/24 -j ACCEPT
+    - name: "On accepte les sorties provenant de notre Frontend"
+      command: iptables -A OUTPUT -d {{ip_frontend}} -j ACCEPT

@@ -1,0 +1,23 @@
+---
+version: '3.6'
+services:
+  wordpress:
+    image: wordpress:latest
+    restart: always
+    ports:
+      - "{{ansible_facts.ens4.ipv4.address}}:82:80"
+    volumes:
+      - /home/wordpress-data:/var/www/html/wp-content
+    environment:
+      {% for db in groups.bdd -%}
+      WORDPRESS_DB_HOST: {{ hostvars[db].db_host }}:{{ hostvars[db].db_port}}
+      {% endfor -%}
+      {% for db in groups.bdd -%}
+      WORDPRESS_DB_USER: {{ hostvars[db].ansible_user }}
+      {% endfor -%}
+      {% for db in groups.bdd -%}
+      WORDPRESS_DB_PASSWORD: {{ hostvars[db].ansible_password }}
+      {% endfor -%}
+      {% for db in groups.bdd -%}
+      WORDPRESS_DB_NAME: {{ hostvars[db].db_name }}
+      {% endfor -%}

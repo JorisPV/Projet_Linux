@@ -1,0 +1,91 @@
+global
+    log 127.0.0.1 local0 notice
+    user haproxy
+    group haproxy
+    chroot  /var/lib/haproxy
+    daemon
+    stats socket /var/lib/haproxy/stats mode 660 level operator
+    maxconn 8000
+    tune.ssl.default-dh-param   2048
+    pidfile /var/run/haproxy.pid
+
+defaults
+    log global
+    retries 3
+    option      redispatch
+    maxconn 8000
+    timeout http-request 10s
+    timeout queue 10s
+    timeout connect 10s
+    timeout client 10s
+    timeout server 10s
+    timeout check 10s
+    stats       enable
+
+listen stats
+    bind 0.0.0.0:8080
+    log global
+    mode http
+    maxconn 10
+    timeout client 1m
+    timeout connect 1m
+    timeout queue 1m
+    timeout server 1m
+    stats enable
+    stats hide-version
+    stats refresh 30s
+    stats show-node
+    stats uri /
+
+frontend www-http
+    bind 0.0.0.0:80
+    bind 0.0.0.0:81
+    mode http
+    default_backend web
+    option forwardfor
+frontend wordpress
+    bind 0.0.0.0:82
+    mode http
+    default_backend wordpress
+    option forwardfor
+frontend ifconfigio
+    bind 0.0.0.0:8000
+    mode http
+    default_backend ifconfig
+    option forwardfor  
+
+backend web
+    mode http
+    {% for backend in groups.backend_gra -%}
+      server {{ hostvars[backend].ansible_facts.fqdn }} {{ hostvars[backend].ansible_facts.default_ipv4.address }}:80 check
+    {% endfor -%}
+    {% for backend in groups.backend_sbg -%}
+      server {{ hostvars[backend].ansible_facts.fqdn }} {{ hostvars[backend].ansible_facts.default_ipv4.address }}:80 check
+    {% endfor -%}
+
+backend web_prive
+    mode http
+    {% for backend in groups.backend_gra -%}
+      server {{ hostvars[backend].ansible_facts.fqdn }} {{ hostvars[backend].ansible_ens4.ipv4.address }}:80 check backup
+    {% endfor -%}
+    {% for backend in groups.backend_sbg -%}
+      server {{ hostvars[backend].ansible_facts.fqdn }} {{ hostvars[backend].ansible_ens4.ipv4.address }}:80 check backup
+    {% endfor -%}
+
+backend ifconfig
+    mode http
+    {% for backend in groups.backend_gra -%}
+      server {{ hostvars[backend].ansible_facts.fqdn }} {{ hostvars[backend].ansible_ens4.ipv4.address }}:8080 check backup
+    {% endfor -%}
+    {% for backend in groups.backend_sbg -%}
+      server {{ hostvars[backend].ansible_facts.fqdn }} {{ hostvars[backend].ansible_ens4.ipv4.address }}:8080 check backup
+    {% endfor -%}
+
+backend wordpress
+    mode http
+    {% for backend in groups.backend_gra -%}
+      server {{ hostvars[backend].ansible_facts.fqdn }} {{ hostvars[backend].ansible_ens4.ipv4.address }}:82 check backup
+    {% endfor -%}
+    {% for backend in groups.backend_sbg -%}
+      server {{ hostvars[backend].ansible_facts.fqdn }} {{ hostvars[backend].ansible_ens4.ipv4.address }}:82 check backup
+    {% endfor -%}

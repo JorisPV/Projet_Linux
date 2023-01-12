@@ -1,0 +1,34 @@
+---
+frontend:
+  hosts:
+    ${frontend}:
+      ansible_user: debian
+      ansible_become: True
+
+backend_gra:
+  hosts:
+%{ for instance in backend_gra ~}
+    ${instance}:
+      ansible_user: debian
+      ansible_become: True
+%{ endfor ~}
+
+backend_sbg:
+  hosts:
+%{ for instance in backend_sbg ~}
+    ${instance}:
+      ansible_user: debian
+      ansible_become: True
+%{ endfor ~}
+
+bdd:
+  hosts:
+    ${host}:
+      ansible_user: ${user}
+      ansible_become: True
+      ansible_password: ${mdp}
+  vars:
+    db_host: ${host}
+    db_name: ${wordpress}
+    db_port: ${port}
+
