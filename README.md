@@ -138,7 +138,7 @@ variable "nombre_instance_backend" {
 ```
 cat inventory.yml
 ```
-Récupérer l'IP frondend, puis y accéder :
+Récupérer l'IP frondent, puis y accéder dans votre navigateur internet :
 ```
 https://votre_ip_frontend:80 - Accès nginx1
 https://votre_ip_frontend:81 : Accès nginx2
