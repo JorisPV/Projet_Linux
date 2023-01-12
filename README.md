@@ -109,19 +109,6 @@ Déployer les configurations
 ansible-playbook deploy-infra.yml --ssh-common-args='-o StrictHostKeyChecking=no'
 ```
 
-# Accéder aux différents services
-```
-cat inventory.yml
-```
-Récupérer l'IP frondend, puis y accéder :
-```
-https://votre_ip_frontend:80 - Accès nginx1
-https://votre_ip_frontend:81 : Accès nginx2
-https://votre_ip_frontend:82 : Accès backend Wordpress
-https://votre_ip_frontend:8000 : Accès ifconfig.io
-https://votre_ip_frontend:8080 : Accès aux statistiques de HaProxy
-```
-
 # Firewall
 
 - Le Vrack est en "Open bar" ; tout le reste est bloqué.
@@ -136,7 +123,28 @@ https://votre_ip_frontend:8080 : Accès aux statistiques de HaProxy
 
 # Scalabilité
 
-Il est possible d'augmenter le nombre d'instance en modifiant les variables disponible dans le fichier "variables.tf"
+Le projet permet de créer autant d'instance Backend que nous souhaitons. En effet, il suffit de modifier la variable "nombre_instance_backend" dans variables.tf
+
+```
+# Nombre d'instance Backend
+variable "nombre_instance_backend" {
+   type = number
+   default = 3 #Définir le nombre, on peut par exemple en mettre 10.
+}
+```
+
+# Accéder aux différents services
+```
+cat inventory.yml
+```
+Récupérer l'IP frondend, puis y accéder :
+```
+https://votre_ip_frontend:80 - Accès nginx1
+https://votre_ip_frontend:81 : Accès nginx2
+https://votre_ip_frontend:82 : Accès backend Wordpress
+https://votre_ip_frontend:8000 : Accès ifconfig.io
+https://votre_ip_frontend:8080 : Accès aux statistiques de HaProxy
+```
 
 # Résultat final
 
