@@ -40,7 +40,7 @@
     > Dossier HaProxy
     - haproxy.cfg : Configuration haproxy
     > Dossier web
-    - index.html : site web à déployer sur les instants backends
+    - index.html : site web à déployer sur les instances backends
 	> Dossier NFS
 	- nfs.j2 : Contient la configuration du NFS
     > Dossier ifconfig.io
