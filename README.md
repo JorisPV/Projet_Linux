@@ -1,5 +1,7 @@
 # Présentation du projet Linux - Eductive20
 
+Résultat : 17
+
 ### Objectif du Projet
 
 - Obtenir un site WordPress de haute disponibilité
